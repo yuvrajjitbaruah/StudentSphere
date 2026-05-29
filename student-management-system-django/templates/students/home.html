@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<section class="hero card glass-card">
+    <div class="hero-copy">
+        <p class="eyebrow">Modern Student Intelligence Platform</p>
+        <h2>Manage Student Records with a Premium, Interactive Experience.</h2>
+        <p>
+            Auth-first workflow, secure data management, analytics cards, filters, exports,
+            and a 3D interactive hero inspired by cutting-edge web design.
+        </p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'student_list' %}" class="btn-primary">Open Dashboard</a>
+                <a href="{% url 'student_create' %}" class="btn-secondary">Add Student</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary">Login</a>
+                <a href="{% url 'signup' %}" class="btn-secondary">Create Account</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-canvas-wrap">
+        <canvas id="hero3d"></canvas>
+        <div class="hero-live-badges">
+            <span>Auto Orbit</span>
+            <span>Pointer Parallax</span>
+            <span>Dynamic Lights</span>
+            <span>Comet FX</span>
+        </div>
+        <div id="hero3dFallback" class="hero-fallback">
+            <div class="cube">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="feature-grid">
+    <article class="card glass-card">
+        <h3>Auth & Security</h3>
+        <p>Login/signup based access and permission-based Django admin control.</p>
+    </article>
+    <article class="card glass-card">
+        <h3>Smart Dashboard</h3>
+        <p>Search, course filter, sort, pagination, and quick stats in one place.</p>
+    </article>
+    <article class="card glass-card">
+        <h3>Data Pipeline</h3>
+        <p>Supabase PostgreSQL ready with CSV export for easy operational workflows.</p>
+    </article>
+</section>
+
+<section class="feature-grid">
+    <article class="card glass-card">
+        <h3>Liquid Glass UI</h3>
+        <p>Adaptive translucency, soft glow layers, premium blur depth, and micro-motions.</p>
+    </article>
+    <article class="card glass-card">
+        <h3>Productivity First</h3>
+        <p>Saved filters, fast shortcuts, bulk actions, and dashboard quick presets.</p>
+    </article>
+    <article class="card glass-card">
+        <h3>Engagement Layer</h3>
+        <p>Toast feedback, onboarding tips, and timeline-style activity blocks.</p>
+    </article>
+</section>
+
+<script type="module" src="{% static 'js/hero3d.js' %}"></script>
+<script src="{% static 'js/hero-fallback-drag.js' %}"></script>
+{% endblock %}

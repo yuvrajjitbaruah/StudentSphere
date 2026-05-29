@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>Delete Student</h2>
+    <p>Are you sure you want to delete <strong>{{ student.name }}</strong>?</p>
+    <p class="muted-text">This action cannot be undone. The record will be removed from dashboard analytics as well.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="button-row">
+            <button type="submit" class="btn-danger">Yes, Delete</button>
+            <a href="{% url 'student_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>{% if is_edit %}Update Student{% else %}Add Student{% endif %}</h2>
+    <p class="muted-text">Fill all required fields. Use valid contact details for accurate reporting and outreach.</p>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">{% if is_edit %}Save Changes{% else %}Create Student{% endif %}</button>
+            <a href="{% url 'student_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

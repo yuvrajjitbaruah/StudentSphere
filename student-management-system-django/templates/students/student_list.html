@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block content %}
+<section class="stats-grid">
+    <article class="card glass-card">
+        <p class="stat-label">Total Students</p>
+        <h3>{{ total_students }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Courses</p>
+        <h3>{{ total_courses }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Active Students</p>
+        <h3>{{ active_students }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Alumni</p>
+        <h3>{{ alumni_students }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Inactive Students</p>
+        <h3>{{ inactive_students }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Data API</p>
+        <h3><a href="{% url 'students_api' %}" target="_blank">Open JSON</a></h3>
+    </article>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row dashboard-head">
+        <h2>Student Management</h2>
+        <span class="pill">{{ students.paginator.count }} filtered records</span>
+    </div>
+    {% if missing_phone_count > 0 %}
+        <div class="onboarding-tip">
+            <span>Missing data alert: {{ missing_phone_count }} students have no phone number.</span>
+        </div>
+    {% endif %}
+    <div class="dashboard-toolbar">
+        <div class="toolbar-group">
+            <button class="mini-btn" type="button" id="presetActive">Active</button>
+            <button class="mini-btn" type="button" id="presetAlumni">Alumni</button>
+            <button class="mini-btn" type="button" id="presetYear1">Year 1</button>
+            <button class="mini-btn" type="button" id="presetRecent">Recent</button>
+            <button class="mini-btn" type="button" id="presetMissingPhone">Missing Phone</button>
+        </div>
+        {% if can_edit_students %}
+        <div class="toolbar-group">
+            <button class="mini-btn" type="button" id="saveCurrentFilter">Save Filter</button>
+            <button class="mini-btn" type="button" id="loadSavedFilter">Use Saved Filter</button>
+            <button class="mini-btn" type="button" id="clearSavedFilter">Clear Saved</button>
+            <button class="mini-btn" type="button" id="toggleDensity">Compact</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <form method="get" class="search-form" id="studentSearchForm">
+        <input type="text" id="searchInput" name="q" value="{{ query }}" placeholder="Search by name, roll number, course, or email">
+        <select name="course">
+            <option value="">All courses</option>
+            {% for course_name in course_options %}
+                <option value="{{ course_name }}" {% if course_name == course_filter %}selected{% endif %}>{{ course_name }}</option>
+            {% endfor %}
+        </select>
+        <select name="status">
+            <option value="">All statuses</option>
+            {% for status_value, status_label in status_options %}
+                <option value="{{ status_value }}" {% if status_value == status_filter %}selected{% endif %}>{{ status_label }}</option>
+            {% endfor %}
+        </select>
+        <select name="year">
+            <option value="">All years</option>
+            {% for y in year_options %}
+                <option value="{{ y }}" {% if y|stringformat:"s" == year_filter %}selected{% endif %}>Year {{ y }}</option>
+            {% endfor %}
+        </select>
+        <select name="has_phone">
+            <option value="">Phone: Any</option>
+            <option value="yes" {% if has_phone_filter == "yes" %}selected{% endif %}>Phone: Available</option>
+            <option value="no" {% if has_phone_filter == "no" %}selected{% endif %}>Phone: Missing</option>
+        </select>
+        <select name="sort">
+            <option value="name" {% if sort_by == "name" %}selected{% endif %}>Sort: Name A-Z</option>
+            <option value="roll_number" {% if sort_by == "roll_number" %}selected{% endif %}>Sort: Roll Number</option>
+            <option value="course" {% if sort_by == "course" %}selected{% endif %}>Sort: Course</option>
+            <option value="-updated_at" {% if sort_by == "-updated_at" %}selected{% endif %}>Sort: Recently Updated</option>
+            <option value="year" {% if sort_by == "year" %}selected{% endif %}>Sort: Year Low-High</option>
+            <option value="-year" {% if sort_by == "-year" %}selected{% endif %}>Sort: Year High-Low</option>
+        </select>
+        <select name="per_page">
+            <option value="8" {% if per_page == 8 %}selected{% endif %}>8 / page</option>
+            <option value="16" {% if per_page == 16 %}selected{% endif %}>16 / page</option>
+            <option value="24" {% if per_page == 24 %}selected{% endif %}>24 / page</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50 / page</option>
+        </select>
+        <button type="submit" class="btn-primary">Search</button>
+        <a class="btn-secondary" href="{% url 'students_import_csv' %}">Import CSV</a>
+        <a class="btn-secondary" href="{% url 'students_export_csv' %}?q={{ query }}&course={{ course_filter }}&status={{ status_filter }}&year={{ year_filter }}&has_phone={{ has_phone_filter }}&sort={{ sort_by }}">Export Filtered CSV</a>
+    </form>
+    <form method="post" action="{% url 'save_filter_preset' %}" class="search-form" style="margin-top:0.3rem;">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Preset name (e.g. Active CSE Year 1)" required>
+        <input type="hidden" name="q" value="{{ query }}">
+        <input type="hidden" name="course" value="{{ course_filter }}">
+        <input type="hidden" name="status" value="{{ status_filter }}">
+        <input type="hidden" name="year" value="{{ year_filter }}">
+        <input type="hidden" name="has_phone" value="{{ has_phone_filter }}">
+        <input type="hidden" name="sort" value="{{ sort_by }}">
+        <input type="hidden" name="per_page" value="{{ per_page }}">
+        <button type="submit" class="btn-secondary">Save Preset (Account)</button>
+    </form>
+    {% if saved_presets %}
+        <div class="dashboard-toolbar">
+            <div class="toolbar-group">
+                {% for preset in saved_presets %}
+                    <a class="mini-btn" href="{% url 'apply_filter_preset' preset.id %}">{{ preset.name }}</a>
+                    <a class="mini-btn danger" href="{% url 'delete_filter_preset' preset.id %}">x</a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'students_bulk_delete' %}">
+        {% csrf_token %}
+    <div class="table-wrap">
+        <table id="studentsTable" class="table-density-comfort">
+            <thead>
+                <tr>
+                    <th>{% if can_manage_students %}<input type="checkbox" id="selectAllStudents" aria-label="Select all students">{% endif %}</th>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Course</th>
+                    <th>Email</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{% if can_manage_students %}<input type="checkbox" class="student-select" name="selected_students" value="{{ student.id }}">{% endif %}</td>
+                    <td><a href="{% url 'student_detail' student.pk %}">{{ student.name }}</a></td>
+                    <td>{{ student.roll_number }}</td>
+                    <td>{{ student.course }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.year }}</td>
+                    <td>{{ student.get_status_display }}</td>
+                    <td class="actions">
+                        <a href="{% url 'student_detail' student.pk %}">View</a>
+                        {% if can_edit_students %}
+                            <a href="{% url 'student_update' student.pk %}">Edit</a>
+                        {% endif %}
+                        {% if can_manage_students %}
+                            <a href="{% url 'student_duplicate' student.pk %}">Duplicate</a>
+                            <a href="{% url 'student_delete' student.pk %}" class="danger">Delete</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty">No students found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+        {% if can_manage_students %}
+            <div id="selectionSummary" class="selection-summary">0 students selected.</div>
+            <div class="button-row">
+                <button type="submit" class="btn-danger">Delete Selected</button>
+                <select name="bulk_status" id="bulkStatusSelect" style="max-width: 240px;">
+                    <option value="">Change selected status...</option>
+                    {% for status_value, status_label in status_options %}
+                        <option value="{{ status_value }}">{{ status_label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-secondary" formaction="{% url 'students_bulk_status' %}" id="bulkStatusBtn">Apply Status</button>
+            </div>
+        {% endif %}
+    </form>
+
+    {% if students.paginator.num_pages > 1 %}
+    <div class="pagination">
+        {% if students.has_previous %}
+            <a href="?q={{ query }}&course={{ course_filter }}&status={{ status_filter }}&year={{ year_filter }}&has_phone={{ has_phone_filter }}&sort={{ sort_by }}&per_page={{ per_page }}&page={{ students.previous_page_number }}">Previous</a>
+        {% endif %}
+        <span>Page {{ students.number }} of {{ students.paginator.num_pages }}</span>
+        {% if students.has_next %}
+            <a href="?q={{ query }}&course={{ course_filter }}&status={{ status_filter }}&year={{ year_filter }}&has_phone={{ has_phone_filter }}&sort={{ sort_by }}&per_page={{ per_page }}&page={{ students.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+<section class="feature-grid">
+    <article class="card glass-card">
+        <h3>Top Courses</h3>
+        <ul class="timeline-list">
+            {% for item in course_distribution_top %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div><strong>{{ item.course }}</strong> - {{ item.total }} students</div>
+                </li>
+            {% empty %}
+                <li class="empty">No course data.</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article class="card glass-card">
+        <h3>Year Distribution</h3>
+        <ul class="timeline-list">
+            {% for item in year_distribution %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div><strong>Year {{ item.year }}</strong> - {{ item.total }} students</div>
+                </li>
+            {% empty %}
+                <li class="empty">No year data.</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article class="card glass-card">
+        <h3>Needs Attention</h3>
+        <ul class="timeline-list">
+            {% for student in attention_students %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    <div><strong>{{ student.name }}</strong> - {{ student.get_status_display }}</div>
+                </li>
+            {% empty %}
+                <li class="empty">No inactive/alumni records needing review.</li>
+            {% endfor %}
+        </ul>
+    </article>
+</section>
+
+<section class="card glass-card">
+    <h3>Top Email Domains</h3>
+    <ul class="timeline-list">
+        {% for item in email_domains_top %}
+            <li class="timeline-item">
+                <span class="timeline-dot"></span>
+                <div><strong>{{ item.domain }}</strong> - {{ item.total }} students</div>
+            </li>
+        {% empty %}
+            <li class="empty">No email domain data available.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h3>Recent Admissions (Last 5)</h3>
+        <a class="btn-secondary" href="{% url 'student_create' %}">Add New Student</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Course</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in recent_created %}
+                    <tr>
+                        <td><a href="{% url 'student_detail' student.pk %}">{{ student.name }}</a></td>
+                        <td>{{ student.roll_number }}</td>
+                        <td>{{ student.course }}</td>
+                        <td>{{ student.created_at|timezone:"Asia/Kolkata"|date:"d M Y, h:i A" }} IST</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="empty">No recent admissions yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h3>AI Productivity Studio</h3>
+        <span class="pill">Powered by Student Support AI</span>
+    </div>
+    <p class="muted-text">Run quick AI actions on your current portal data and workflow tasks.</p>
+    <div class="ai-tools-grid">
+        <article class="ai-tool-card">
+            <h4>Summarize Dashboard</h4>
+            <p class="muted-text">Get a concise overview of student data health and trends.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Give me a concise dashboard summary with key metrics and one recommendation.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Find At-Risk Areas</h4>
+            <p class="muted-text">Identify risky data patterns and operational concerns.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Analyze student records and list potential risk areas with practical fixes.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Draft Announcement</h4>
+            <p class="muted-text">Create a student-facing notice from current context.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Draft a short, friendly announcement for students about portal updates and support tips.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Explain Course Distribution</h4>
+            <p class="muted-text">Interpret what the chart might imply and what to do next.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Explain the course distribution chart like you are talking to a student portal manager. Include 3 actionable insights.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Data Cleanup Checklist</h4>
+            <p class="muted-text">Suggest improvements to normalize and maintain clean student records.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Create a practical data cleanup checklist for student records (name, roll number, course, email, phone, status). Keep it short and actionable.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Bulk Import Guidance</h4>
+            <p class="muted-text">Generate a checklist to prevent CSV import errors.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Given typical CSV import issues, list common causes of import errors and how to avoid them. Tailor it to this student portal fields.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Manager FAQ Draft</h4>
+            <p class="muted-text">Write 5 short FAQs for managers to answer student questions.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Draft 5 short, clear FAQ answers for students about admissions, course selection, attendance, and portal support. Keep them concise.">Generate</button>
+        </article>
+        <article class="ai-tool-card">
+            <h4>Action Plan</h4>
+            <p class="muted-text">Create a 7-day plan to improve portal operations.</p>
+            <button type="button" class="mini-btn ai-tool-btn" data-ai-prompt="Create a 7-day action plan to improve student portal operations using available student data (and without inventing facts). Provide daily tasks as a short list.">Generate</button>
+        </article>
+    </div>
+    <div class="dashboard-toolbar" style="margin-top:0.65rem;">
+        <div class="toolbar-group">
+            <button type="button" class="mini-btn" id="aiToolCopy">Copy Output</button>
+        </div>
+    </div>
+    <div id="aiToolOutput" class="ai-output">AI output will appear here...</div>
+</section>
+
+{% if recent_activities %}
+<section class="card glass-card" style="margin-top: 1.2rem;">
+    <h3>Recent Student Activity (Last 5)</h3>
+    <ul class="timeline-list">
+        {% for item in recent_activities %}
+            <li class="timeline-item">
+                <span class="timeline-dot"></span>
+                <div>
+                    <strong>{{ item.action }}</strong>
+                    <div class="muted-text">
+                        {{ item.description }}<br>
+                        {{ item.created_at|timezone:"Asia/Kolkata"|date:"d M Y, h:i:s A" }} IST
+                    </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

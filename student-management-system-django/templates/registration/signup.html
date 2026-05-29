@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card auth-card glass-card">
+    <h2>Create Account</h2>
+    <p>Register to start managing student records.</p>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary">Sign Up</button>
+    </form>
+    <p class="muted-text">Your account opens instant access to dashboard filters, analytics, and AI support.</p>
+    <p class="muted-text">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</section>
+{% endblock %}

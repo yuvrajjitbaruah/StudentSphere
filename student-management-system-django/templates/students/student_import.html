@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>Bulk Import Students (CSV)</h2>
+    <p>Columns: <code>Name</code>, <code>Roll Number</code>, <code>Course</code>, <code>Email</code>, <code>Phone</code>, <code>Notes</code>, <code>Year</code>, <code>Status</code>.</p>
+    <div class="onboarding-tip">
+        <span>Tip: keep course spellings consistent to improve analytics charts.</span>
+        <a href="{% url 'students_export_csv' %}" class="mini-btn">Download Sample Format</a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="csv_file" accept=".csv" required>
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Upload CSV</button>
+            <a href="{% url 'student_list' %}" class="btn-secondary">Back to Dashboard</a>
+        </div>
+    </form>
+
+    {% if result.created or result.updated or result.errors %}
+    <div class="import-result">
+        <p>Created: {{ result.created }}</p>
+        <p>Updated: {{ result.updated }}</p>
+        {% if result.warnings %}
+            <h4>Warnings</h4>
+            <ul>
+                {% for w in result.warnings %}
+                    <li>{{ w }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if result.errors %}
+            <h4>Errors</h4>
+            <ul>
+                {% for e in result.errors %}
+                    <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
