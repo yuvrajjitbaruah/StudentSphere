@@ -1,96 +1,170 @@
 # 🎓 StudentSphere
 
-A modern student management platform built with Django that helps educational institutions efficiently manage student records, authentication, analytics, and AI-powered support.
+> Modern Student Management Platform with AI-Powered Assistance
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Django](https://img.shields.io/badge/Django-4.x-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+![Gemini AI](https://img.shields.io/badge/Gemini-AI-orange)
 
 ---
 
-## 🚀 Features
+## 📖 About StudentSphere
+
+StudentSphere is a modern student management platform built with Django that helps educational institutions efficiently manage student records, authentication, analytics, and AI-powered support.
+
+The platform provides a clean and user-friendly interface for managing student information while integrating AI capabilities to enhance productivity and user experience.
+
+---
+
+## ✨ Features
 
 - 🔐 Secure Authentication System
 - 👨‍🎓 Student Records Management
+- ➕ Add, Edit & Delete Students
 - 📊 Dashboard & Analytics
 - 🤖 AI-Powered Student Support Chatbot
-- 📁 CSV Import & Export
 - 🔍 Advanced Search & Filtering
 - 📱 Responsive User Interface
-- 🗄️ PostgreSQL / Supabase Database Support
-- ⚡ Fast and Scalable Django Backend
+- 🗄️ PostgreSQL / Supabase Support
+- ⚡ Fast Django Backend
+- 🎨 Modern User Experience
 
 ---
 
 ## 📸 Screenshots
 
-### Dashboard
+### 🏠 Home Page
+
+![Home Page](screenshots/home-page.png)
+
+The landing page of StudentSphere providing quick access to student management features and AI-powered tools.
+
+---
+
+### 📊 Dashboard
+
 ![Dashboard](screenshots/dashboard.png)
 
-### Student Management
-![Student List](screenshots/student-list.png)
+A centralized dashboard displaying student information, statistics, and quick actions.
 
-### Analytics
+---
+
+### ➕ Add Student
+
+![Add Student](screenshots/add-student.png)
+
+Simple and intuitive interface for adding and managing student records.
+
+---
+
+### 📈 Analytics
+
 ![Analytics](screenshots/analytics.png)
 
-### AI Chatbot
+Visual insights and analytics to help track student data effectively.
+
+---
+
+### 🤖 AI Chatbot
+
 ![AI Chatbot](screenshots/ai-chatbot.png)
+
+AI-powered assistant integrated into StudentSphere for student support and guidance.
+
+---
+
+### 💬 AI Chatbot (Clear View)
+
+![AI Chatbot Clear View](screenshots/ai-chatbot-clearview.png)
+
+Expanded chatbot interface for enhanced interaction and readability.
+
+---
+
+### ✨ AI Studio Integration
+
+![AI Studio](screenshots/ai-studio.png)
+
+Demonstration of Gemini AI integration and intelligent assistance features.
 
 ---
 
 ## 🛠️ Tech Stack
 
+### Backend
 - Python
 - Django
+
+### Database
 - PostgreSQL
 - Supabase
+
+### Frontend
 - HTML
 - CSS
 - JavaScript
+
+### AI Integration
 - Google Gemini API
 
 ---
 
 ## ⚙️ Installation
 
-Clone the repository:
+### Clone Repository
 
 ```bash
 git clone https://github.com/yuvrajjitbaruah/StudentSphere.git
 cd StudentSphere
 ```
 
-Create a virtual environment:
+### Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate virtual environment:
+### Activate Virtual Environment
 
-### Windows
+#### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-### Linux / macOS
+#### Linux / macOS
 
 ```bash
 source venv/bin/activate
 ```
 
-Install dependencies:
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
+### Configure Environment Variables
+
 Create a `.env` file using `.env.example`.
 
-Run migrations:
+Example:
+
+```env
+SECRET_KEY=your_secret_key
+DEBUG=True
+DATABASE_URL=your_database_url
+GEMINI_API_KEY=your_api_key
+```
+
+### Run Database Migrations
 
 ```bash
 python manage.py migrate
 ```
 
-Start development server:
+### Start Development Server
 
 ```bash
 python manage.py runserver
@@ -104,37 +178,54 @@ http://127.0.0.1:8000
 
 ---
 
-## 🤖 AI Chatbot Setup
+## 🤖 AI Chatbot Configuration
 
-To enable the AI chatbot, add your own Gemini API key inside the `.env` file:
+To enable AI chatbot functionality:
+
+1. Create a Gemini API key from Google AI Studio.
+2. Add the key to your `.env` file:
 
 ```env
 GEMINI_API_KEY=your_api_key_here
 ```
 
-The chatbot will remain disabled until a valid API key is configured.
+Without a valid API key, the chatbot will remain disabled.
 
 ---
 
 ## 📬 Feedback & Suggestions
 
-For suggestions, improvements, or collaboration opportunities:
+For suggestions, bug reports, feature requests, or collaboration opportunities:
 
-📧 dev.yuvrajjitbaruah@gmail.com
+📧 **dev.yuvrajjitbaruah@gmail.com**
 
 ---
 
 ## 🌐 Connect With Me
 
-- LinkedIn: https://www.linkedin.com/in/yuvrajjitbaruah/
-- GitHub: https://github.com/yuvrajjitbaruah
-- Linktree: https://linktr.ee/yuvrajjitbaruah
+### LinkedIn
+https://www.linkedin.com/in/yuvrajjitbaruah/
+
+### GitHub
+https://github.com/yuvrajjitbaruah
+
+### Linktree
+https://linktr.ee/yuvrajjitbaruah
 
 ---
 
 ## ⭐ Support
 
 If you found this project useful, consider giving it a star on GitHub.
+
+---
+
+## 👨‍💻 Developer
+
+**Yuvrajjit Baruah**
+
+Computer Science & Engineering Student  
+AI & Cloud Computing Enthusiast
 
 ---
 
