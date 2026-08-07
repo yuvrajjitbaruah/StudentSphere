@@ -23,6 +23,11 @@
                     <span class="user-badge">Hi, {{ user.username }}</span>
                     <a class="btn-link" href="{% url 'home' %}">Home</a>
                     <a class="btn-link" href="{% url 'student_list' %}">Dashboard</a>
+                    <a class="btn-link" href="{% url 'assignment_list' %}">Assignments</a>
+                    <a class="btn-link" href="{% url 'report_card' %}">Report Card</a>
+                    <a class="btn-link" href="{% url 'announcement_list' %}">Announcements</a>
+                    <a class="btn-link" href="{% url 'chat_room' %}">Messages</a>
+                    <a class="btn-link" href="{% url 'ticket_list' %}">Support</a>
                     <a class="btn-link" href="{% url 'student_create' %}">Add Student</a>
                     <a class="btn-link" href="{% url 'students_export_csv' %}">Export CSV</a>
                     <form method="post" action="{% url 'logout' %}" class="inline-form">
