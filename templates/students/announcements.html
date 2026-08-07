@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if can_post %}
+<section class="card glass-card form-card">
+    <h2>Post an Announcement</h2>
+    <p class="muted-text">Optionally broadcast the announcement to every student by email or SMS.</p>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Post Announcement</button>
+        </div>
+    </form>
+</section>
+{% endif %}
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>Announcements</h2>
+        <span class="pill">{{ announcements|length }} recent</span>
+    </div>
+    <ul class="timeline-list">
+        {% for announcement in announcements %}
+        <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div>
+                <strong>{{ announcement.title }}</strong>
+                <p class="muted-text">{{ announcement.body }}</p>
+                <small class="muted-text">
+                    {{ announcement.created_at }}
+                    {% if announcement.created_by %} &middot; {{ announcement.created_by.username }}{% endif %}
+                    {% if announcement.send_email %} &middot; Emailed{% endif %}
+                    {% if announcement.send_sms %} &middot; SMS sent{% endif %}
+                </small>
+            </div>
+        </li>
+        {% empty %}
+        <li class="empty">No announcements posted yet.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}
