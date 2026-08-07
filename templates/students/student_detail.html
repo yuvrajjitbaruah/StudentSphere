@@ -16,9 +16,121 @@
     </div>
     <p><strong>Notes:</strong> {{ student.notes|default:"-" }}</p>
     <div class="button-row">
-        <a href="{% url 'student_update' student.pk %}" class="btn-primary">Edit</a>
-        <a href="{% url 'student_delete' student.pk %}" class="btn-danger">Delete</a>
+        {% if can_edit_academic %}
+            <a href="{% url 'student_update' student.pk %}" class="btn-primary">Edit</a>
+            <a href="{% url 'student_delete' student.pk %}" class="btn-danger">Delete</a>
+        {% endif %}
         <a href="{% url 'student_list' %}" class="btn-secondary">Back</a>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="card glass-card">
+        <p class="stat-label">Attendance</p>
+        <h3>{% if attendance_percentage is not None %}{{ attendance_percentage }}%{% else %}No records{% endif %}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Present / Late / Absent</p>
+        <h3>{{ attendance_present }} / {{ attendance_late }} / {{ attendance_absent }}</h3>
+    </article>
+    <article class="card glass-card">
+        <p class="stat-label">Average Grade (Published)</p>
+        <h3>{% if average_grade is not None %}{{ average_grade }}{% else %}-{% endif %}</h3>
+    </article>
+</section>
+
+<section class="feature-grid">
+    <article class="card glass-card">
+        <div class="header-row">
+            <h3>Attendance</h3>
+            {% if can_edit_academic %}
+                <a href="{% url 'attendance_tracking' student.pk %}" class="btn-secondary">Mark</a>
+            {% endif %}
+        </div>
+        <ul class="timeline-list">
+            {% for record in attendance %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    {{ record.date }} &mdash; {{ record.get_status_display }}
+                    {% if record.notes %}<br><small class="muted-text">{{ record.notes }}</small>{% endif %}
+                </li>
+            {% empty %}
+                <li class="empty">No attendance recorded yet.</li>
+            {% endfor %}
+        </ul>
+    </article>
+
+    <article class="card glass-card">
+        <div class="header-row">
+            <h3>Skills</h3>
+            {% if can_edit_academic %}
+                <a href="{% url 'student_skill_records' student.pk %}" class="btn-secondary">Add</a>
+            {% endif %}
+        </div>
+        <ul class="timeline-list">
+            {% for record in skills %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    {{ record.skill.name }} &mdash; {{ record.level }}
+                    {% if record.notes %}<br><small class="muted-text">{{ record.notes }}</small>{% endif %}
+                </li>
+            {% empty %}
+                <li class="empty">No skills recorded yet.</li>
+            {% endfor %}
+        </ul>
+    </article>
+
+    <article class="card glass-card">
+        <div class="header-row">
+            <h3>Extracurriculars</h3>
+            {% if can_edit_academic %}
+                <a href="{% url 'extracurricular_records' student.pk %}" class="btn-secondary">Add</a>
+            {% endif %}
+        </div>
+        <ul class="timeline-list">
+            {% for record in activities %}
+                <li class="timeline-item">
+                    <span class="timeline-dot"></span>
+                    {{ record.activity_name }}{% if record.role %} &mdash; {{ record.role }}{% endif %}
+                    {% if record.achievement %}<br><small class="muted-text">{{ record.achievement }}</small>{% endif %}
+                </li>
+            {% empty %}
+                <li class="empty">No extracurricular records yet.</li>
+            {% endfor %}
+        </ul>
+    </article>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h3>Assignment Submissions</h3>
+        <span class="pill">{{ submissions|length }} shown</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Grade</th>
+                    <th>Published</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td>{{ submission.assignment.title }}</td>
+                    <td>{{ submission.grade|default:"Not graded" }}</td>
+                    <td>{{ submission.is_published|yesno:"Yes,No" }}</td>
+                    <td>{{ submission.submitted_at }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="empty">No submissions yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </section>
 {% endblock %}
