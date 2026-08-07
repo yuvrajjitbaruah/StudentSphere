@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>Raise a Support Ticket</h2>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Create Ticket</button>
+        </div>
+    </form>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>Support Tickets</h2>
+        <span class="pill">{{ tickets|length }} total</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.title }}</td>
+                    <td>{{ ticket.get_status_display }}</td>
+                    <td>{{ ticket.created_at }}</td>
+                    <td>{{ ticket.updated_at }}</td>
+                    <td class="actions">
+                        <a href="{% url 'ticket_detail' ticket.pk %}">Open</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">No support tickets yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

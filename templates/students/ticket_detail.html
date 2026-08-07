@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>{{ ticket.title }}</h2>
+        <span class="pill">{{ ticket.get_status_display }}</span>
+    </div>
+    <p class="muted-text">{{ ticket.description }}</p>
+    <p><small class="muted-text">Opened by {{ ticket.created_by.username }} on {{ ticket.created_at }}</small></p>
+
+    <ul class="timeline-list">
+        {% for message in ticket.messages.all %}
+        <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div>
+                <strong>{{ message.author.username }}</strong>
+                <p class="muted-text">{{ message.message }}</p>
+                <small class="muted-text">{{ message.created_at }}</small>
+            </div>
+        </li>
+        {% empty %}
+        <li class="empty">No replies yet.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ reply_form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Reply</button>
+            <a href="{% url 'ticket_list' %}" class="btn-secondary">Back to Tickets</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

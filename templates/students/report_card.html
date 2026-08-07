@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>Report Card</h2>
+        {% if average is not None %}<span class="pill">Average: {{ average }}</span>{% endif %}
+    </div>
+    {% if not student %}
+        <p class="muted-text">
+            No student record is linked to your account email yet. Ask a faculty member to make sure your
+            account email matches your student record.
+        </p>
+    {% else %}
+        <p class="muted-text">Published grades for <strong>{{ student.name }}</strong> ({{ student.roll_number }}).</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Course</th>
+                        <th>Grade</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.assignment.title }}</td>
+                        <td>{{ item.assignment.course }}</td>
+                        <td>{{ item.grade|default:"-" }}</td>
+                        <td>{{ item.feedback|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty">No published results yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

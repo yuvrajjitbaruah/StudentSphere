@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>Publish Results</h2>
+    <p class="muted-text">
+        Publishing an assignment makes every graded submission visible to students on their report card.
+        Ungraded submissions are left untouched.
+    </p>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        <label>Assignment
+            <select name="assignment_id" required>
+                <option value="">Select an assignment...</option>
+                {% for assignment in assignments %}
+                    <option value="{{ assignment.id }}">{{ assignment.title }} ({{ assignment.course }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Publish Graded Results</button>
+            <a href="{% url 'assignment_list' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

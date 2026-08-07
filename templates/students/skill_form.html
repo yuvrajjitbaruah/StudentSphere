@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <div class="header-row">
+        <h2>Add Skill</h2>
+        <span class="pill">{{ student.name }}</span>
+    </div>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Save Skill</button>
+            <a href="{% url 'student_detail' student.pk %}" class="btn-secondary">Back to Profile</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

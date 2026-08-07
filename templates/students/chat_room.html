@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <h2>Send a Message</h2>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Send</button>
+        </div>
+    </form>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>Recent Messages</h2>
+        <span class="pill">{{ messages|length }} shown</span>
+    </div>
+    <ul class="timeline-list">
+        {% for message in messages %}
+        <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div>
+                <strong>
+                    {% if message.sender == user %}
+                        You &rarr; {{ message.recipient.username }}
+                    {% else %}
+                        {{ message.sender.username }} &rarr; You
+                    {% endif %}
+                </strong>
+                <p class="muted-text">{{ message.message }}</p>
+                <small class="muted-text">{{ message.sent_at }}</small>
+            </div>
+        </li>
+        {% empty %}
+        <li class="empty">No messages yet. Say hello!</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

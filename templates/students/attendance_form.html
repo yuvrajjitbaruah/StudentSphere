@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card form-card">
+    <div class="header-row">
+        <h2>Mark Attendance</h2>
+        <span class="pill">{{ student.name }}</span>
+    </div>
+    <p class="muted-text">One attendance record is kept per student per day; marking again for the same date updates it.</p>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Save Attendance</button>
+            <a href="{% url 'student_detail' student.pk %}" class="btn-secondary">Back to Profile</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
