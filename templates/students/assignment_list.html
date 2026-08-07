@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>Assignments</h2>
+        {% if is_faculty %}
+            <a class="btn-primary" href="{% url 'assignment_create' %}">New Assignment</a>
+        {% endif %}
+    </div>
+    <p class="muted-text">
+        {% if is_faculty %}
+            Upload assignments, review submissions, and publish grades once they're finalised.
+        {% else %}
+            Assignments matching your course and year. Submit your work before the due date.
+        {% endif %}
+    </p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Year</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>{{ assignment.title }}</td>
+                    <td>{{ assignment.course }}</td>
+                    <td>{{ assignment.year }}</td>
+                    <td>{{ assignment.due_date|default:"-" }}</td>
+                    <td class="actions">
+                        {% if assignment.attachment %}
+                            <a href="{{ assignment.attachment.url }}" target="_blank">Attachment</a>
+                        {% endif %}
+                        {% if not is_faculty %}
+                            <a href="{% url 'assignment_submit' assignment.pk %}">Submit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">No assignments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card glass-card">
+    <div class="header-row">
+        <h2>{% if is_faculty %}Submissions{% else %}My Submissions{% endif %}</h2>
+        {% if is_faculty %}
+            <div class="button-row" style="margin:0;">
+                <a class="btn-secondary" href="{% url 'publish_results' %}">Publish Results</a>
+                <a class="btn-secondary" href="{% url 'export_submissions_csv' %}">Export CSV</a>
+            </div>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    {% if is_faculty %}<th>Student</th>{% endif %}
+                    <th>Grade</th>
+                    <th>Published</th>
+                    <th>Submitted</th>
+                    {% if is_faculty %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td>{{ submission.assignment.title }}</td>
+                    {% if is_faculty %}<td>{{ submission.student.name }}</td>{% endif %}
+                    <td>{{ submission.grade|default:"Not graded" }}</td>
+                    <td>{{ submission.is_published|yesno:"Yes,No" }}</td>
+                    <td>{{ submission.submitted_at }}</td>
+                    {% if is_faculty %}
+                    <td class="actions">
+                        <a href="{% url 'submission_grade' submission.pk %}">Grade</a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="empty">No submissions yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
