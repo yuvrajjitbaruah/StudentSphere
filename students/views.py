@@ -307,6 +307,22 @@ def student_detail(request, pk):
     skills = student.skill_records.select_related("skill").all()[:10]
     activities = student.extracurricular_records.all()[:10]
     submissions = student.submissions.select_related("assignment").all()[:10]
+
+    all_attendance = student.attendance_records.all()
+    attendance_total = all_attendance.count()
+    attendance_present = all_attendance.filter(status="present").count()
+    attendance_late = all_attendance.filter(status="late").count()
+    attendance_absent = all_attendance.filter(status="absent").count()
+    attendance_percentage = (
+        round(((attendance_present + attendance_late) / attendance_total) * 100, 1)
+        if attendance_total
+        else None
+    )
+
+    graded_submissions = student.submissions.filter(is_published=True, grade__isnull=False)
+    grades = [float(item.grade) for item in graded_submissions]
+    average_grade = round(sum(grades) / len(grades), 2) if grades else None
+
     return render(
         request,
         "students/student_detail.html",
@@ -317,6 +333,12 @@ def student_detail(request, pk):
             "activities": activities,
             "submissions": submissions,
             "can_edit_academic": is_faculty(request.user),
+            "attendance_total": attendance_total,
+            "attendance_present": attendance_present,
+            "attendance_late": attendance_late,
+            "attendance_absent": attendance_absent,
+            "attendance_percentage": attendance_percentage,
+            "average_grade": average_grade,
         },
     )
 
@@ -571,10 +593,18 @@ def attendance_tracking(request, pk):
         return redirect("student_detail", pk=pk)
     form = AttendanceForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        attendance = form.save(commit=False)
-        attendance.student = student
-        attendance.marked_by = request.user
-        attendance.save()
+        # A student can only have one attendance record per date, so re-marking
+        # the same date updates the existing record instead of raising an
+        # IntegrityError on the (student, date) unique constraint.
+        attendance, _created = AttendanceRecord.objects.update_or_create(
+            student=student,
+            date=form.cleaned_data["date"],
+            defaults={
+                "status": form.cleaned_data["status"],
+                "notes": form.cleaned_data["notes"],
+                "marked_by": request.user,
+            },
+        )
         log_activity(
             "attendance_marked",
             f"Marked {attendance.status} for {student.name} on {attendance.date}",
@@ -705,6 +735,36 @@ def publish_results(request):
         return redirect_with_notice("assignment_list", results_published=updated)
     assignments = Assignment.objects.all()
     return render(request, "students/publish_results.html", {"assignments": assignments})
+
+
+@login_required
+@user_passes_test(is_faculty)
+def export_submissions_csv(request):
+    """Export all assignment submissions & grades as CSV for offline record-keeping."""
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="assignment_submissions.csv"'
+    writer = csv.writer(response)
+    writer.writerow(
+        ["Assignment", "Course", "Student", "Roll Number", "Grade", "Published", "Submitted At", "Graded At"]
+    )
+    submissions = AssignmentSubmission.objects.select_related("assignment", "student").order_by(
+        "assignment__title", "student__name"
+    )
+    for submission in submissions:
+        writer.writerow(
+            [
+                submission.assignment.title,
+                submission.assignment.course,
+                submission.student.name,
+                submission.student.roll_number,
+                submission.grade if submission.grade is not None else "",
+                "Yes" if submission.is_published else "No",
+                submission.submitted_at,
+                submission.graded_at or "",
+            ]
+        )
+    log_activity("submissions_exported", "Exported assignment submissions CSV", actor=request.user)
+    return response
 
 
 @login_required
