@@ -22,4 +22,28 @@ urlpatterns = [
     path("api/students/", views.students_api, name="students_api"),
     path("api/analytics/", views.analytics_api, name="analytics_api"),
     path("api/support-chat/", views.support_ai_chat_api, name="support_ai_chat_api"),
+
+    # --- Attendance, skills & extracurriculars (per-student records) ---
+    path("students/<int:pk>/attendance/", views.attendance_tracking, name="attendance_tracking"),
+    path("students/<int:pk>/skills/", views.student_skill_records, name="student_skill_records"),
+    path("students/<int:pk>/extracurricular/", views.extracurricular_records, name="extracurricular_records"),
+
+    # --- Assignments & grading workflow ---
+    path("assignments/", views.assignment_list, name="assignment_list"),
+    path("assignments/create/", views.assignment_create, name="assignment_create"),
+    path("assignments/<int:pk>/submit/", views.assignment_submit, name="assignment_submit"),
+    path("assignments/submissions/<int:pk>/grade/", views.submission_grade, name="submission_grade"),
+    path("assignments/publish-results/", views.publish_results, name="publish_results"),
+    path("assignments/submissions/export/csv/", views.export_submissions_csv, name="export_submissions_csv"),
+    path("report-card/", views.report_card_view, name="report_card"),
+
+    # --- Announcements ---
+    path("announcements/", views.announcement_list_create, name="announcement_list"),
+
+    # --- Direct messaging ---
+    path("chat/", views.chat_room, name="chat_room"),
+
+    # --- Support tickets ---
+    path("tickets/", views.ticket_list_create, name="ticket_list"),
+    path("tickets/<int:pk>/", views.ticket_detail, name="ticket_detail"),
 ]
